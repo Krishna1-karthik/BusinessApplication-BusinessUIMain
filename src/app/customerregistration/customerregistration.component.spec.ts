@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 import { CustomerregistrationComponent } from './customerregistration.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { provideRouter } from '@angular/router';
 
 describe('CustomerregistrationComponent', () => {
   let component: CustomerregistrationComponent;
@@ -9,19 +10,18 @@ describe('CustomerregistrationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CustomerregistrationComponent],
-      imports: [CustomerregistrationComponent]
+      imports: [CustomerregistrationComponent],
+      providers: [provideHttpClient(), provideRouter([])]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(CustomerregistrationComponent);
     component = fixture.componentInstance;
+    spyOn(component, 'getCurrentLocation');
     fixture.detectChanges();
   });
 
   it('should create', () => {
-    const fixture = TestBed.createComponent(CustomerregistrationComponent);
-    const component = fixture.componentInstance;
     expect(component).toBeTruthy();
   });
 });

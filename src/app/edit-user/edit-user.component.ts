@@ -4,6 +4,8 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { BusinessService } from '../service/business.service';
+import { AuthService } from '../service/auth.service';
+import { BusinessVersion, BusinessVersionService, BusinessVersionSnapshot } from '../service/business-version.service';
 import { GoogleMapsModule } from '@angular/google-maps';
 import Swal from 'sweetalert2';
 
@@ -33,7 +35,15 @@ export class EditUserComponent {
   imagePreview: string | undefined;
   fileUpload: any;
   emailExists: boolean = false;
-  constructor(private fb: FormBuilder, private businessService: BusinessService,private router: Router) {
+  businessVersions: BusinessVersion[] = [];
+  historyStorageUnavailable = false;
+  constructor(
+    private fb: FormBuilder,
+    private businessService: BusinessService,
+    private businessVersionService: BusinessVersionService,
+    private authService: AuthService,
+    private router: Router
+  ) {
    
   }
 
@@ -68,6 +78,8 @@ export class EditUserComponent {
 
   submitBusinessForm() {
     if (this.editBusinessForm.valid) {
+      const before = this.createBusinessSnapshot(this.businessDetails?.[0]);
+      const after = this.createBusinessSnapshot(this.editBusinessForm.getRawValue());
       const formData = new FormData();
 
       for (const key in this.editBusinessForm.value) {
@@ -79,6 +91,13 @@ export class EditUserComponent {
       this.businessService.updateBusinessDetails(formData).subscribe({
             next: (response) => {
               if (response) {
+                this.historyStorageUnavailable = !this.businessVersionService.recordVersion(
+                  this.domainID,
+                  this.authService.getEmailIDFromToken() ?? 'Unknown user',
+                  before,
+                  after
+                );
+                this.businessVersions = this.businessVersionService.getVersions(this.domainID);
                 Swal.fire({
                   icon: 'success',
                   title: 'Success',
@@ -111,6 +130,21 @@ export class EditUserComponent {
           });
         }
       }
+
+  loadVersion(version: BusinessVersion): void {
+    this.editBusinessForm.patchValue(version.after);
+  }
+
+  private createBusinessSnapshot(source: Partial<BusinessVersionSnapshot> | null | undefined): BusinessVersionSnapshot {
+    return {
+      name: String(source?.name ?? ''),
+      emailId: String(source?.emailId ?? ''),
+      description: String(source?.description ?? ''),
+      location: String(source?.location ?? ''),
+      categoryID: String(source?.categoryID ?? ''),
+      subCategoryID: String(source?.subCategoryID ?? '')
+    };
+  }
 
   submitCustomerForm()  {
     if (this.editCustomerForm.valid) {
@@ -162,6 +196,7 @@ export class EditUserComponent {
     if (roleID === 3) {
       this.businessService.getBusinessDetailById(domainID).subscribe((data) => {
         this.businessDetails = data;
+        this.businessVersions = this.businessVersionService.getVersions(domainID);
         const categoryID = this.businessDetails[0].categoryID || ''; // Get category ID
         const subCategoryID = this.businessDetails[0].subCategoryID || '';
         // Ensure data exists before patching

@@ -24,7 +24,6 @@ describe('BusinesssearchComponent', () => {
     
     fixture = TestBed.createComponent(BusinesssearchComponent);
     component = fixture.componentInstance;
-    spyOn(component, 'getCurrentLocation');
     fixture.detectChanges();
     buisnessService.getCustomerDetailsByID.calls.reset();
   });
@@ -33,44 +32,43 @@ describe('BusinesssearchComponent', () => {
     expect(component).toBeTruthy();
   });
   it('update pagination with values',()=>{
-    component.businessList.length =100;
+    component.businessList.set(Array.from({ length: 100 }, (_, businessID) => ({ businessID })));
     component.itemsPerPage =10;
     component.updatePagination();
-    expect(component.totalPages).toEqual(10);
-    expect(component.isPaginationVisible).toEqual(true);
+    expect(component.totalPages()).toEqual(10);
+    expect(component.isPaginationVisible()).toEqual(true);
   })
   it('update pagination with no values',()=>{
-    component.businessList.length =0;
+    component.businessList.set([]);
     component.itemsPerPage =10;
     component.updatePagination();
-    expect(component.totalPages).toEqual(0);
-    expect(component.isPaginationVisible).toEqual(false);
+    expect(component.totalPages()).toEqual(0);
+    expect(component.isPaginationVisible()).toEqual(false);
   })
   it('pagination previous button disable if current page in one',()=>{
-    component.currentPage =1;
-    component.isPaginationVisible =true;
+    component.businessList.set(Array.from({ length: 20 }, (_, businessID) => ({ businessID })));
+    component.currentPage.set(1);
     fixture.detectChanges();
     const previouButton =fixture.debugElement.nativeElement.querySelector('#previous-button');
     expect(previouButton.disabled).toEqual(true);
   })
   it('pagination next button disable if current page is equal to total count',()=>{
-    component.currentPage =1;
-    component.isPaginationVisible =true;
+    component.businessList.set(Array.from({ length: 20 }, (_, businessID) => ({ businessID })));
+    component.currentPage.set(2);
     fixture.detectChanges();
     const previouButton =fixture.debugElement.nativeElement.querySelector('#next-button');
     expect(previouButton.disabled).toEqual(true);
   })
   it('pagination page display',()=>{
-    component.currentPage =1;
-    component.totalPages =10;
-    component.isPaginationVisible =true;
+    component.businessList.set(Array.from({ length: 100 }, (_, businessID) => ({ businessID })));
+    component.currentPage.set(1);
     fixture.detectChanges();
     const pageDispaly =fixture.debugElement.nativeElement.querySelector('#page-display').textContent;
     expect(pageDispaly).toEqual('Page 1 of 10');
   })
   it('pagination call previous button',()=>{
-    component.isPaginationVisible =true;
-    component.currentPage = 10;
+    component.businessList.set(Array.from({ length: 100 }, (_, businessID) => ({ businessID })));
+    component.currentPage.set(10);
     fixture.detectChanges();
     spyOn(component,'previousPage');
     const previouButton = fixture.debugElement.nativeElement.querySelector('#previous-button');
@@ -78,9 +76,8 @@ describe('BusinesssearchComponent', () => {
     expect(component.previousPage).toHaveBeenCalledTimes(1);
   })
   it('pagination call next button',()=>{
-    component.isPaginationVisible =true;
-    component.totalPages = 100;
-    component.currentPage = 1;
+    component.businessList.set(Array.from({ length: 1000 }, (_, businessID) => ({ businessID })));
+    component.currentPage.set(1);
     fixture.detectChanges();
     spyOn(component,'nextPage');
     const previouButton = fixture.debugElement.nativeElement.querySelector('#next-button');

@@ -10,7 +10,6 @@ import Swal from 'sweetalert2';
   selector: 'app-customerregistration',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, GoogleMapsModule, RouterLink],
-  providers: [BusinessService],
   templateUrl: './customerregistration.component.html',
   styleUrl: './customerregistration.component.css'
 })

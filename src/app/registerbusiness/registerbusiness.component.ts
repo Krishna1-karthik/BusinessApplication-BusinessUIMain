@@ -1,21 +1,23 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BusinessService } from '../service/business.service';
 import { CommonModule } from '@angular/common';
 import { GoogleMapsModule } from "@angular/google-maps";
 import Swal from 'sweetalert2';
 import { Router, RouterLink } from '@angular/router'; 
+import { GoogleMapsLoaderService } from '../service/google-maps-loader.service';
 
 @Component({
   selector: 'app-registerbusiness',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, GoogleMapsModule, RouterLink],
-  providers: [BusinessService],
   templateUrl: './registerbusiness.component.html',
   styleUrl: './registerbusiness.component.css'
 })
 export class RegisterbusinessComponent implements OnInit {
-  readonly isGoogleMapsAvailable = typeof google !== 'undefined';
+  readonly isGoogleMapsAvailable = signal(false);
+  readonly isGoogleMapsLoading = signal(true);
+  readonly mapLoadError = signal<string | null>(null);
   registerForm: FormGroup;
   categories: any[] = [];
   subCategories: any[] = [];
@@ -25,13 +27,18 @@ export class RegisterbusinessComponent implements OnInit {
   isHidden = true;
   private messageService = inject(BusinessService);
 
-  center: google.maps.LatLngLiteral = { lat: 0, lng: 0 }; // Default to San Francisco
+  center: google.maps.LatLngLiteral = { lat: 8.3, lng: 9.3 };
   zoom = 10;
   marker: google.maps.LatLngLiteral | null = null;
   fileName: string | undefined;
   imagePreview: string | undefined;
 
-  constructor(private fb: FormBuilder, private businessService: BusinessService,private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private businessService: BusinessService,
+    private router: Router,
+    private googleMapsLoader: GoogleMapsLoaderService
+  ) {
     this.registerForm = this.fb.group({
       Name: ['', [Validators.required, Validators.minLength(3)]],
       EmailId: ['', [Validators.required, Validators.email]],
@@ -50,7 +57,15 @@ export class RegisterbusinessComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getCurrentLocation();
+    this.googleMapsLoader.load().then(() => {
+      this.isGoogleMapsAvailable.set(true);
+      this.isGoogleMapsLoading.set(false);
+      this.getCurrentLocation();
+    }).catch((error: Error) => {
+      console.error('Unable to load Google Maps:', error);
+      this.mapLoadError.set('Map unavailable. Enter your location manually.');
+      this.isGoogleMapsLoading.set(false);
+    });
     this.getCategories();
   }
   
@@ -108,7 +123,7 @@ export class RegisterbusinessComponent implements OnInit {
   
   onLocationInput(): void {
     const location = this.registerForm.controls['location'].value;
-    if (location && this.isGoogleMapsAvailable) {
+    if (location && this.isGoogleMapsAvailable()) {
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ address: location }, (results, status) => {
         if (status === 'OK' && results && results[0]) {
@@ -125,7 +140,7 @@ export class RegisterbusinessComponent implements OnInit {
   }
   
   getLocationName(lat: number, lng: number): void {
-    if (!this.isGoogleMapsAvailable) {
+    if (!this.isGoogleMapsAvailable()) {
       return;
     }
 

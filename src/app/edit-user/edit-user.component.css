@@ -152,3 +152,69 @@ h1 {
 .login-link a:hover {
   text-decoration: underline;
 }
+
+.version-history {
+  max-width: 600px;
+  margin: 24px auto;
+  padding-top: 16px;
+  border-top: 1px solid #d6dadd;
+}
+
+.version-history-heading,
+.version-entry-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.version-history-heading h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.version-history-heading span,
+.version-entry-heading span {
+  color: #626b73;
+  font-size: 0.875rem;
+}
+
+.version-entry {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #d6dadd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.version-entry ul {
+  margin: 10px 0;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+
+.load-version-btn {
+  padding: 6px 10px;
+  border: 1px solid #176b55;
+  border-radius: 4px;
+  background: #fff;
+  color: #176b55;
+}
+
+.history-empty,
+.history-warning {
+  margin: 12px 0 0;
+}
+
+.history-warning {
+  color: #9b2c2c;
+}
+
+@media (max-width: 520px) {
+  .version-history-heading,
+  .version-entry-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

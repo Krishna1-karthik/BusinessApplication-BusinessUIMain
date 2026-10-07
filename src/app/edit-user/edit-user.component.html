@@ -117,6 +117,32 @@
       </div>
       
     </form>
+
+  <section *ngIf="roleID === 3" class="version-history" aria-labelledby="version-history-title">
+    <div class="version-history-heading">
+      <h2 id="version-history-title">Business version history</h2>
+      <span>Stored in this browser</span>
+    </div>
+    <p *ngIf="historyStorageUnavailable" class="history-warning" role="alert">
+      Changes were saved, but this browser could not save a history entry.
+    </p>
+    <p *ngIf="businessVersions.length === 0" class="history-empty">No saved business changes yet.</p>
+    <article *ngFor="let version of businessVersions" class="version-entry">
+      <header class="version-entry-heading">
+        <strong>{{ version.createdAt | date: 'medium' }}</strong>
+        <span>{{ version.actor }}</span>
+      </header>
+      <ul>
+        <li *ngFor="let change of version.changes">
+          <strong>{{ change.label }}:</strong>
+          {{ change.previous || 'Empty' }} to {{ change.current || 'Empty' }}
+        </li>
+      </ul>
+      <button type="button" class="load-version-btn" (click)="loadVersion(version)">
+        Load this version into the form
+      </button>
+    </article>
+  </section>
   
 
   <!-- Customer Edit Form -->

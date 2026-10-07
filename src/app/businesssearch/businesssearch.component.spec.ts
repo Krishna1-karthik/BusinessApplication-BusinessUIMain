@@ -1,23 +1,32 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import { of } from 'rxjs';
 import { BusinesssearchComponent } from './businesssearch.component';
 import { BusinessService } from '../service/business.service';
-import { HttpClientModule  } from '@angular/common/http';
-fdescribe('BusinesssearchComponent', () => {
+describe('BusinesssearchComponent', () => {
   let component: BusinesssearchComponent;
   let fixture: ComponentFixture<BusinesssearchComponent>;
-  let buisnessService =jasmine.createSpyObj('BusinessService',['getCustomerDetailsByID']);
+  let buisnessService: jasmine.SpyObj<BusinessService>;
   beforeEach(async () => {
+    buisnessService = jasmine.createSpyObj<BusinessService>('BusinessService', [
+      'getCustomerDetailsByID',
+      'getCategories'
+    ]);
+    buisnessService.getCustomerDetailsByID.and.returnValue(of([{ latitude: 8.3, longitude: 9.3 }]));
+    buisnessService.getCategories.and.returnValue(of([]));
+
     await TestBed.configureTestingModule({
-      imports: [BusinesssearchComponent,HttpClientModule],
-      providers: [{provide:BusinessService,useValue:buisnessService}] // Provide the BusinessService if used
+      imports: [BusinesssearchComponent]
+    })
+    .overrideComponent(BusinesssearchComponent, {
+      set: { providers: [{ provide: BusinessService, useValue: buisnessService }] }
     })
     .compileComponents(); 
     
     fixture = TestBed.createComponent(BusinesssearchComponent);
     component = fixture.componentInstance;
-    buisnessService =TestBed.inject(BusinessService);
+    spyOn(component, 'getCurrentLocation');
     fixture.detectChanges();
+    buisnessService.getCustomerDetailsByID.calls.reset();
   });
 
   it('should create', () => {
@@ -80,17 +89,17 @@ fdescribe('BusinesssearchComponent', () => {
   })
   it('Customer Detail check service is called with right input',()=>{
     component.cusId =1;
-    buisnessService.getCustomerDetailsByID(1);
     component.getCustomerDetails();
-   expect(buisnessService.getCustomerDetailsByID).toHaveBeenCalledOnceWith(component.cusId);
+    expect(buisnessService.getCustomerDetailsByID).toHaveBeenCalledOnceWith(component.cusId);
 
   })
-  it('Customer Detail call ',()=>{
+  it('stores customer details returned by the service',()=>{
     component.cusId =1;
-    buisnessService.getCustomerDetailsByID(1).callFake((result:any) =>{
-      component.customerData = result;
-    }
+    const customerDetails = [{ latitude: 10, longitude: 20 }];
+    buisnessService.getCustomerDetailsByID.and.returnValue(of(customerDetails));
 
-    )
+    component.getCustomerDetails();
+
+    expect(component.customerData).toEqual(customerDetails);
   });
 });

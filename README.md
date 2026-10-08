@@ -14,6 +14,14 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
+## Production bundle analysis
+
+Run `npm run build -- --configuration production --stats-json` to emit the production bundle report at `dist/business/stats.json`. The build output also lists the raw and estimated transfer sizes for the initial and lazy-loaded chunks.
+
+## Google Maps configuration
+
+Set `API_KEY` in `src/environments/environment.ts` and `src/environments/environment.prod.ts` to an active Google Maps JavaScript API key. Enable the Maps JavaScript API and billing for its Google Cloud project, and allow the development and deployed application referrers. The registration map displays an error message if Google rejects the key.
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AdminService } from '../service/admin.service';
@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 @Component({
   selector: 'app-subadmin',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, CommonModule, RouterLink,HttpClientModule],
   providers: [AdminService],
   templateUrl: './subadmin.component.html',
@@ -16,12 +17,10 @@ import { HttpClientModule } from '@angular/common/http';
 })
 export class SubadminComponent {
   loginFormSubadmin: FormGroup;
-  responsedata: any;
-  errorMessage: string | null = null;
-  isButtonDisabled: boolean = false;
-  getemail: string = '';
-  emailExists: boolean = false;
-  message = '';
+  errorMessage = signal<string | null>(null);
+  isButtonDisabled = signal(false);
+  emailExists = signal(false);
+  message = signal('');
 
   constructor(private fb: FormBuilder, private subadminservice: AdminService, private router: Router) {
     localStorage.clear();
@@ -45,10 +44,10 @@ export class SubadminComponent {
     if (email) {
       this.subadminservice.checkEmailExistsAdmin(email).subscribe({
         next: (exists) => {
-          this.emailExists = exists;
+          this.emailExists.set(exists);
         },
         error: () => {
-          this.emailExists = false;
+          this.emailExists.set(false);
         }
       });
     }
@@ -58,12 +57,12 @@ export class SubadminComponent {
     if (this.loginFormSubadmin.invalid) {
       return;
     }
-    if (this.emailExists == true) {
-      this.message = 'Email is already registered!';   
+    if (this.emailExists()) {
+      this.message.set('Email is already registered!');
       return;   
     }
     if (this.loginFormSubadmin.valid) {
-      this.isButtonDisabled = true;
+      this.isButtonDisabled.set(true);
       this.subadminservice.addSubAdmin(this.loginFormSubadmin.get("email")?.value).subscribe({
         next: (response) => {
           if (response) {
@@ -108,7 +107,7 @@ export class SubadminComponent {
     }
     else {
       alert('Please enter a valid EmailId');
-      this.isButtonDisabled = false;
+      this.isButtonDisabled.set(false);
     }
   }
 }

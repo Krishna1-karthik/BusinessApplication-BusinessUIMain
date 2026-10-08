@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, shareReplay, throwError } from 'rxjs';
 import { environment } from './../../environments/environment';
 
 
@@ -12,6 +12,9 @@ export class BusinessService {
   private apiUrl = environment.baseUrl+'Business';
   private cus_ApiUrl = environment.baseUrl+'Customer';
   private businessRating_ApiUrl = environment.baseUrl+'BusinessRating';
+  private categoriesRequest: Observable<any[]> | null = null;
+  private readonly subCategoriesRequests = new Map<number, Observable<any[]>>();
+  private readonly distancesRequests = new Map<string, Observable<any>>();
 
   constructor(private http: HttpClient) {}
 
@@ -46,11 +49,21 @@ export class BusinessService {
   }
 
   searchBusinesses(category: string, subcategory: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/search?category=${category}&subcategory=${subcategory}`);
+    const params = new URLSearchParams({ category, subcategory });
+    return this.http.get<any[]>(`${this.apiUrl}/search?${params.toString()}`);
   }
 
   getCategories(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/GetCategories`);
+    if (!this.categoriesRequest) {
+      this.categoriesRequest = this.http.get<any[]>(`${this.apiUrl}/GetCategories`).pipe(
+        catchError((error) => {
+          this.categoriesRequest = null;
+          return throwError(() => error);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+    return this.categoriesRequest;
   }
 
   getImage(imagename: string): Observable<any[]> {
@@ -58,16 +71,56 @@ export class BusinessService {
   }
 
   getSubCategories(categoryId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/GetSubCategories/${categoryId}`);
+    const cachedRequest = this.subCategoriesRequests.get(categoryId);
+    if (cachedRequest) {
+      return cachedRequest;
+    }
+
+    const request = this.http.get<any[]>(`${this.apiUrl}/GetSubCategories/${categoryId}`).pipe(
+      catchError((error) => {
+        this.subCategoriesRequests.delete(categoryId);
+        return throwError(() => error);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    this.subCategoriesRequests.set(categoryId, request);
+    return request;
   }
   getBusinessDetailById(id: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/getbusinessdetailbyid/${id}`);
   }
   
-  getDistance(originLatitude:any, originLongitude:any, destLatitude:any, destLongitude:any): Observable<any[]>{
-    
-    const url = `https://maps.gomaps.pro/maps/api/distancematrix/json?units=metric&origins=${originLatitude},${originLongitude}&destinations=${destLatitude},${destLongitude}&key=${environment.API_KEY}`;
-    return this.http.get<any>(url);
+  getDistances(
+    originLatitude: number,
+    originLongitude: number,
+    destinations: Array<{ latitude: number; longitude: number }>
+  ): Observable<any> {
+    const destinationCoordinates = destinations
+      .map(({ latitude, longitude }) => `${latitude},${longitude}`)
+      .join('|');
+    const cacheKey = `${originLatitude},${originLongitude}|${destinationCoordinates}`;
+    const cachedRequest = this.distancesRequests.get(cacheKey);
+    if (cachedRequest) {
+      return cachedRequest;
+    }
+
+    const params = new URLSearchParams({
+      units: 'metric',
+      origins: `${originLatitude},${originLongitude}`,
+      destinations: destinationCoordinates,
+      key: environment.API_KEY
+    });
+    const request = this.http
+      .get<any>(`https://maps.gomaps.pro/maps/api/distancematrix/json?${params.toString()}`)
+      .pipe(
+        catchError((error) => {
+          this.distancesRequests.delete(cacheKey);
+          return throwError(() => error);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    this.distancesRequests.set(cacheKey, request);
+    return request;
   }
 
   updateBusinessDetails(formData: FormData): Observable<any> {

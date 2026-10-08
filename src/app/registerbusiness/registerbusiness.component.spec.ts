@@ -4,7 +4,6 @@ import { provideRouter } from '@angular/router';
 import { BusinessService } from '../service/business.service';
 import { GoogleMapsLoaderService } from '../service/google-maps-loader.service';
 import { RegisterbusinessComponent } from './registerbusiness.component';
-import { BusinessService } from '../service/business.service';
 
 describe('RegisterbusinessComponent', () => {
   let component: RegisterbusinessComponent;
@@ -20,7 +19,13 @@ describe('RegisterbusinessComponent', () => {
       imports: [RegisterbusinessComponent],
       providers: [
         provideRouter([]),
-        { provide: GoogleMapsLoaderService, useValue: { load: () => Promise.resolve() } }
+        {
+          provide: GoogleMapsLoaderService,
+          useValue: {
+            load: () => Promise.resolve(),
+            authError: () => false
+          }
+        }
       ]
     })
     .overrideComponent(RegisterbusinessComponent, {

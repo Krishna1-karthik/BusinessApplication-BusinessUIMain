@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BusinessService } from '../service/business.service';
 import { CommonModule } from '@angular/common';
@@ -39,6 +39,14 @@ export class RegisterbusinessComponent implements OnInit {
     private router: Router,
     private googleMapsLoader: GoogleMapsLoaderService
   ) {
+    effect(() => {
+      if (this.googleMapsLoader.authError()) {
+        this.isGoogleMapsAvailable.set(false);
+        this.isGoogleMapsLoading.set(false);
+        this.mapLoadError.set('Google Maps rejected the API key. Check Maps JavaScript API access, billing, and allowed referrers.');
+      }
+    }, { allowSignalWrites: true });
+
     this.registerForm = this.fb.group({
       Name: ['', [Validators.required, Validators.minLength(3)]],
       EmailId: ['', [Validators.required, Validators.email]],

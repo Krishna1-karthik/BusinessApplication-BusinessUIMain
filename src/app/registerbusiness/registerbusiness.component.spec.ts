@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { BusinessService } from '../service/business.service';
+import { GoogleMapsLoaderService } from '../service/google-maps-loader.service';
 import { RegisterbusinessComponent } from './registerbusiness.component';
 
 describe('RegisterbusinessComponent', () => {
@@ -16,7 +17,10 @@ describe('RegisterbusinessComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [RegisterbusinessComponent],
-      providers: [provideRouter([])]
+      providers: [
+        provideRouter([]),
+        { provide: GoogleMapsLoaderService, useValue: { load: () => Promise.resolve() } }
+      ]
     })
     .overrideComponent(RegisterbusinessComponent, {
       set: { providers: [{ provide: BusinessService, useValue: businessService }] }

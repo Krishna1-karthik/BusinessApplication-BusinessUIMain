@@ -14,7 +14,7 @@
           placeholder="Enter Email Here"          
           class="form-control"
         />
-        <p *ngIf="emailExists" style="color: red;">
+        <p *ngIf="emailExists()" style="color: red;">
           This email is already registered.
         </p>
       <div *ngIf="email?.touched && email?.invalid" class="error">
@@ -37,8 +37,8 @@
       </p>
       </div>  
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
+      <div *ngIf="errorMessage()" class="error-message">
+        {{ errorMessage() }}
       </div>
     </form>
   </div>

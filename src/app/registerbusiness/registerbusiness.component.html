@@ -76,7 +76,7 @@
     <!-- Location Field -->
     <div class="form-group">
       <label for="location">Select Location</label>
-      <div class="map-container" *ngIf="isGoogleMapsAvailable">
+      <div class="map-container" *ngIf="isGoogleMapsAvailable()">
         <google-map
           height="400px"
           width="100%"
@@ -87,7 +87,8 @@
           <map-marker *ngIf="marker" [position]="marker"></map-marker>
         </google-map>
       </div>
-      <small *ngIf="!isGoogleMapsAvailable">Map unavailable. Enter your location manually.</small>
+      <small *ngIf="isGoogleMapsLoading()">Loading map...</small>
+      <small *ngIf="mapLoadError()">{{ mapLoadError() }}</small>
       <input
         type="text"
         class="form-control mt-3"

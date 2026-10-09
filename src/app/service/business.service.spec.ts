@@ -24,6 +24,38 @@ describe('BusinessService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('searches businesses by name using the supplied query', () => {
+    const businesses = [{ businessID: 1, name: 'ABC Consulting' }];
+    let result: unknown;
+
+    service.searchBusinessesByName('ABC Consulting').subscribe(value => result = value);
+
+    const request = httpTestingController.expectOne(request => {
+      const url = new URL(request.url);
+      return url.pathname.endsWith('/Business/search-by-name') &&
+        url.searchParams.get('name') === 'ABC Consulting';
+    });
+    expect(request.request.method).toBe('GET');
+    request.flush(businesses);
+    expect(result).toEqual(businesses);
+  });
+
+  it('surfaces business name search failures', () => {
+    let receivedError: unknown;
+
+    service.searchBusinessesByName('ABC Consulting').subscribe({
+      error: error => receivedError = error
+    });
+
+    const request = httpTestingController.expectOne(request => {
+      const url = new URL(request.url);
+      return url.pathname.endsWith('/Business/search-by-name') &&
+        url.searchParams.get('name') === 'ABC Consulting';
+    });
+    request.flush('Search failed', { status: 500, statusText: 'Server Error' });
+    expect(receivedError).toEqual(jasmine.objectContaining({ status: 500 }));
+  });
+
   it('caches categories for subsequent subscribers', () => {
     const categories = [{ categoryID: 1 }];
     let firstResult: unknown;

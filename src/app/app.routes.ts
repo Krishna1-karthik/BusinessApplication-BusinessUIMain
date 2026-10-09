@@ -8,6 +8,7 @@ export const routes: Routes = [
     {path:'Registerbusiness',loadComponent: () => import('./registerbusiness/registerbusiness.component').then(m => m.RegisterbusinessComponent)},
     {path:'Customerregistration',loadComponent: () => import('./customerregistration/customerregistration.component').then(m => m.CustomerregistrationComponent)},
     {path:'Businesssearch',loadComponent: () => import('./businesssearch/businesssearch.component').then(m => m.BusinesssearchComponent), canActivate:[authGuard]},
+    {path:'BusinessNameSearch',loadComponent: () => import('./business-name-search/business-name-search.component').then(m => m.BusinessNameSearchComponent), canActivate:[authGuard]},
     {path:'Forgot-password', loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)},
     {path:'Reset-password', loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent)},
     {path:'Change-password', loadComponent: () => import('./changepassword/changepassword.component').then(m => m.ChangepasswordComponent), canActivate:[authGuard]},

@@ -53,6 +53,11 @@ export class BusinessService {
     return this.http.get<any[]>(`${this.apiUrl}/search?${params.toString()}`);
   }
 
+  searchBusinessesByName(name: string): Observable<any[]> {
+    const params = new URLSearchParams({ name });
+    return this.http.get<any[]>(`${this.apiUrl}/search-by-name?${params.toString()}`);
+  }
+
   getCategories(): Observable<any[]> {
     if (!this.categoriesRequest) {
       this.categoriesRequest = this.http.get<any[]>(`${this.apiUrl}/GetCategories`).pipe(

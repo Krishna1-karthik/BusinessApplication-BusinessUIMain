@@ -1,0 +1,71 @@
+.business-search {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.search-form {
+  margin-top: 1.5rem;
+}
+
+.search-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.search-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-controls input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+}
+
+.search-controls button {
+  padding: 0.65rem 1rem;
+}
+
+.feedback {
+  min-height: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.error {
+  color: #b42318;
+}
+
+.loading,
+.empty-state {
+  margin-top: 1rem;
+}
+
+.business-list {
+  list-style: none;
+  padding: 0;
+}
+
+.business-list li {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+}
+
+.business-list h3,
+.business-list p {
+  margin: 0;
+}
+
+.business-list p {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .search-controls {
+    flex-direction: column;
+  }
+}

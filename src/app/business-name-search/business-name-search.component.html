@@ -1,0 +1,44 @@
+<main class="business-search">
+  <h1>Search Businesses by Name</h1>
+
+  <form (ngSubmit)="onSubmit()" class="search-form">
+    <label for="business-name">Business name</label>
+    <div class="search-controls">
+      <input
+        id="business-name"
+        type="text"
+        [formControl]="searchQuery"
+        placeholder="Enter a business name"
+        autocomplete="organization"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        aria-describedby="search-feedback"
+      />
+      <button type="submit" [disabled]="isLoading()">
+        {{ isLoading() ? 'Searching...' : 'Search' }}
+      </button>
+    </div>
+
+    <p id="search-feedback" class="feedback error" aria-live="polite">
+      {{ validationMessage() || errorMessage() }}
+    </p>
+  </form>
+
+  <p *ngIf="isLoading()" class="loading" role="status" aria-live="polite">
+    Searching businesses...
+  </p>
+
+  <section *ngIf="!isLoading() && businesses().length > 0" aria-label="Search results">
+    <h2>Matching businesses</h2>
+    <ul class="business-list">
+      <li *ngFor="let business of businesses()">
+        <h3>{{ business.name }}</h3>
+        <p *ngIf="business.description">{{ business.description }}</p>
+        <p *ngIf="business.location">{{ business.location }}</p>
+      </li>
+    </ul>
+  </section>
+
+  <p *ngIf="!isLoading() && hasSearched() && businesses().length === 0" class="empty-state" role="status">
+    No businesses found
+  </p>
+</main>

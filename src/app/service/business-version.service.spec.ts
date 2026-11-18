@@ -61,4 +61,27 @@ describe('BusinessVersionService', () => {
 
     expect(service.getVersions(businessId)).toEqual([]);
   });
+
+  it('sorts stored revisions newest first even if storage order is stale', () => {
+    const older = {
+      id: 'older',
+      createdAt: '2026-10-07T12:00:00.000Z',
+      actor: 'owner@example.com',
+      before: original,
+      after: { ...original, name: 'Corner Bakery North' },
+      changes: []
+    };
+    const newer = {
+      ...older,
+      id: 'newer',
+      createdAt: '2026-10-07T13:00:00.000Z',
+      after: { ...original, name: 'Corner Bakery Downtown' }
+    };
+    localStorage.setItem(
+      `business-version-history:${businessId}`,
+      JSON.stringify([older, newer])
+    );
+
+    expect(service.getVersions(businessId).map(version => version.id)).toEqual(['newer', 'older']);
+  });
 });

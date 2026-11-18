@@ -53,8 +53,8 @@ Given('the business has a saved revision from {string} to {string}', (previousNa
 
 Given('the business has two saved revisions', () => {
   savedHistory = [
-    createRevision('Corner Bakery North', 'Corner Bakery Downtown', 'revision-2', '2026-10-07T13:00:00.000Z'),
-    createRevision('Corner Bakery', 'Corner Bakery North', 'revision-1', '2026-10-07T12:00:00.000Z')
+    createRevision('Corner Bakery', 'Corner Bakery North', 'revision-1', '2026-10-07T12:00:00.000Z'),
+    createRevision('Corner Bakery North', 'Corner Bakery Downtown', 'revision-2', '2026-10-07T13:00:00.000Z')
   ];
 });
 

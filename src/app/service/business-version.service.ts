@@ -42,7 +42,18 @@ export class BusinessVersionService {
     try {
       const stored = localStorage.getItem(this.storageKey(businessId));
       const versions: unknown = stored ? JSON.parse(stored) : [];
-      return Array.isArray(versions) ? versions as BusinessVersion[] : [];
+      if (!Array.isArray(versions)) {
+        return [];
+      }
+
+      return (versions as BusinessVersion[]).slice().sort((left, right) => {
+        const leftTime = Date.parse(left.createdAt);
+        const rightTime = Date.parse(right.createdAt);
+        if (Number.isNaN(leftTime) || Number.isNaN(rightTime)) {
+          return 0;
+        }
+        return rightTime - leftTime;
+      });
     } catch {
       return [];
     }
